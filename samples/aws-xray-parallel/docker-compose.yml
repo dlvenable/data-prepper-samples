@@ -1,0 +1,65 @@
+version: "3.7"
+services:
+  data-prepper:
+    restart: unless-stopped
+    container_name: data-prepper
+    image: opensearchproject/data-prepper:latest
+    volumes:
+      - ./data-prepper/pipelines.yaml:/usr/share/data-prepper/pipelines.yaml
+    ports:
+      - "21890:21890"
+    networks:
+      - sample_network
+    depends_on:
+      - "opensearch"
+  aws-otel-collector:
+    container_name: aws-otel-collector
+    image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+    command: [ "--config=otel-local-config.yaml" ]
+    volumes:
+      - ~/.aws:/root/.aws
+      - ./aws-otel-collector/otel-config.yaml:/otel-local-config.yaml
+    environment:
+      - AWS_REGION=us-east-1
+      - AWS_PROFILE=default
+    ports:
+      - "2000:2000"
+      - "2000:2000/udp"
+    depends_on:
+      - data-prepper
+    networks:
+      - sample_network
+  opensearch:
+    container_name: opensearch
+    image: opensearchproject/opensearch:1.3.2
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
+        hard: 65536
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - sample_network
+  dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    depends_on:
+      - opensearch
+    networks:
+      - sample_network
+networks:
+  sample_network:

@@ -1,0 +1,30 @@
+extensions:
+  health_check:
+
+receivers:
+  awsxray:
+    transport: udp
+    endpoint: 0.0.0.0:2000
+    proxy_server:
+      endpoint: 0.0.0.0:2000
+      region: 'us-east-1'
+      local_mode: true
+
+exporters:
+  awsxray:
+    region: 'us-east-1'
+  otlp/data-prepper:
+    endpoint: data-prepper:21890
+    tls:
+      insecure: true
+      insecure_skip_verify: true
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [awsxray]
+      exporters: [awsxray,otlp/data-prepper]
+  telemetry:
+    logs:
+      level: 'debug'

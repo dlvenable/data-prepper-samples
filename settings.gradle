@@ -1,0 +1,4 @@
+rootProject.name = 'data-prepper-samples'
+include 'sample-apps:search-app'
+include 'sample-apps:document-app'
+
