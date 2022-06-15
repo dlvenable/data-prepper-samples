@@ -6,6 +6,8 @@ services:
     image: opensearchproject/data-prepper:latest
     volumes:
       - ./data-prepper/pipelines.yaml:/usr/share/data-prepper/pipelines.yaml
+      - ../certificates/data-prepper/server-cert.pem:/usr/share/data-prepper/server-cert.pem
+      - ../certificates/data-prepper/private-key.pem:/usr/share/data-prepper/private-key.pem
     ports:
       - "21890:21890"
     networks:
@@ -19,6 +21,7 @@ services:
     volumes:
       - ~/.aws:/root/.aws
       - ./aws-otel-collector/otel-config.yaml:/otel-local-config.yaml
+      - ../certificates/data-prepper/root-ca.pem:/data-prepper-cert.pem
     environment:
       - AWS_REGION=us-east-1
       - AWS_PROFILE=default

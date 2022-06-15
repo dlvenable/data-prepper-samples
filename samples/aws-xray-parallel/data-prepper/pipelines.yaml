@@ -2,7 +2,9 @@ entry-pipeline:
   delay: "100"
   source:
     otel_trace_source:
-      ssl: false
+      ssl: true
+      sslKeyCertChainFile: "/usr/share/data-prepper/server-cert.pem"
+      sslKeyFile: "/usr/share/data-prepper/private-key.pem"
   sink:
     - pipeline:
         name: "raw-pipeline"
