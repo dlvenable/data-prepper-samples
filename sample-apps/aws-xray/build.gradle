@@ -20,7 +20,6 @@ subprojects {
         implementation 'com.amazonaws:aws-xray-recorder-sdk-spring:2.11.2'
         implementation 'com.amazonaws:aws-xray-recorder-sdk-apache-http:2.11.2'
         implementation 'org.apache.httpcomponents.client5:httpclient5:5.1.3'
-        implementation 'io.opentelemetry.contrib:opentelemetry-aws-xray:1.14.0'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 }
