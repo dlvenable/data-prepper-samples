@@ -15,6 +15,6 @@ public class AwsXRaySearchApp {
 
     @Bean
     public Filter TracingFilter() {
-        return new AWSXRayServletFilter("SearchApp");
+        return new AWSXRayServletFilter("AwsXRaySearchApp");
     }
 }
