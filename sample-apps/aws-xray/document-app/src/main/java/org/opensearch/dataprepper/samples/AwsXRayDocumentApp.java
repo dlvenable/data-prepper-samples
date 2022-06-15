@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Bean;
 import javax.servlet.Filter;
 
 @SpringBootApplication
-public class SearchApp {
+public class AwsXRayDocumentApp {
     public static void main(final String[] args) {
-        SpringApplication.run(SearchApp.class, args);
+        SpringApplication.run(AwsXRayDocumentApp.class, args);
     }
 
     @Bean
     public Filter TracingFilter() {
-        return new AWSXRayServletFilter("SearchApp");
+        return new AWSXRayServletFilter("ApiApp");
     }
 }
