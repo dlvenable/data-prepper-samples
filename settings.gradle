@@ -1,4 +1,5 @@
 rootProject.name = 'data-prepper-samples'
 include 'sample-apps:aws-xray:search-app'
 include 'sample-apps:aws-xray:document-app'
+include 'sample-apps:s3-source-sample'
 

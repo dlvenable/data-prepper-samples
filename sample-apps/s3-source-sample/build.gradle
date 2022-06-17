@@ -1,0 +1,20 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.0'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+task zip(type: Zip){
+    dependsOn bootJar
+
+    archiveFileName = "${bootJar.archiveBaseName.get()}-${project.version}.zip"
+    from bootJar.archiveFile
+    rename(bootJar.archiveFile.get().asFile.name, 'application.jar')
+}
+
+tasks.assemble.dependsOn(zip)
