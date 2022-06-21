@@ -1,5 +1,6 @@
 package org.opensearch.dataprepper.samples;
 
+import org.opensearch.dataprepper.samples.model.ListOrdersResponse;
 import org.opensearch.dataprepper.samples.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class ResourceApi {
     }
 
     @GetMapping("orders")
-    ResponseEntity<List<Order>> listOrders() {
+    ResponseEntity<ListOrdersResponse> listOrders() {
         final HttpStatus httpStatus = pickStatus();
 
         if (httpStatus.is2xxSuccessful()) {
@@ -38,7 +39,8 @@ public class ResourceApi {
                     .mapToObj(i -> orderGenerator.randomOrder())
                     .collect(Collectors.toList());
 
-            return ResponseEntity.ok(orders);
+            final ListOrdersResponse listOrdersResponse = ListOrdersResponse.builder().orders(orders).build();
+            return ResponseEntity.ok(listOrdersResponse);
         }
 
         return ResponseEntity.status(httpStatus).build();
