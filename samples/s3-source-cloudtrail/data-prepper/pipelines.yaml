@@ -1,0 +1,26 @@
+log-pipeline:
+  source:
+    s3:
+      notification_type: sqs
+      compression: gzip
+      codec:
+        json:
+      sqs:
+        queue_url: "https://sqs.us-east-1.amazonaws.com/ACCOUNT-ID/CloudTrail"
+      aws:
+        region: us-east-1
+        sts_role_arn: "arn:aws:iam::ACCOUNT-ID:role/Data-Prepper"
+
+  processor:
+    - date:
+        from_time_received: true
+        destination: "@timestamp"
+
+
+  sink:
+    - opensearch:
+        hosts: ["https://opensearch:9200"]
+        insecure: true
+        username: "admin"
+        password: "admin"
+        index: aws_cloud_trail
