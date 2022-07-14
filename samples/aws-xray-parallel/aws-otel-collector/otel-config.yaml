@@ -1,6 +1,3 @@
-extensions:
-  health_check:
-
 receivers:
   awsxray:
     transport: udp
@@ -20,7 +17,6 @@ exporters:
       ca_file: '/data-prepper-cert.pem'
 
 service:
-  extensions: [health_check]
   pipelines:
     traces:
       receivers: [awsxray]
