@@ -21,7 +21,7 @@ log-pipeline:
         action:
           put_all:
     - delete_entries:
-        with_keys: ["details"]
+        with_keys: ["details", "log"]
   sink:
     - opensearch:
         hosts: [ "https://opensearch:9200" ]
