@@ -32,18 +32,19 @@ do
     fi
 done
 
-echo "\b "
-echo "OpenSearch Dashboards ready."
-
 # The above command concludes before the OSD server is actually ready.
 # TODO: Find a better API that determines that OSD is ready to receive API requests.
 sleep 5
+
+echo "\b "
+echo "OpenSearch Dashboards ready."
 
 echo 'Create Index Pattern'
 
 curl -X POST 'localhost:5601/api/saved_objects/index-pattern/network_activity' -H 'osd-xsrf: true' -H 'Content-Type: application/json' -u admin:admin -d '
 {
   "attributes": {
-    "title": "network_activity*"
+    "title": "network_activity*",
+    "timeFieldName": "timestamp"
   }
 }'

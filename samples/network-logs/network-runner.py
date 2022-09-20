@@ -58,10 +58,10 @@ for x in range(3):
         destination_ip = destination_ips[n]
         source_port = source_ports[n]
 
-        iso_datetime = datetime.isoformat() + "Z"
-        # TODO: Add timestamp to front
+        # TODO: Fix the timezone.
+        iso_datetime = datetime.isoformat()
         network_log_file.write(
-            "name=compute.example.org example.org {1}:{2} -> {3}:443 {4}"
+            "{0} name=compute.example.org example.org {1}:{2} -> {3}:443 {4}"
                 .format(iso_datetime, source_ip, source_port, destination_ip, remainder) + os.linesep)
 
     network_log_file.flush()
