@@ -5,9 +5,9 @@ services:
     container_name: data-prepper
     image: opensearchproject/data-prepper:latest
     volumes:
-      - ./data-prepper/aggregation.yaml:/usr/share/data-prepper/pipelines.yaml
-      - ../certificates/data-prepper/server-cert.pem:/usr/share/data-prepper/server-cert.pem
-      - ../certificates/data-prepper/private-key.pem:/usr/share/data-prepper/private-key.pem
+      - ../data-prepper/unaggregated.yaml:/usr/share/data-prepper/pipelines.yaml
+      - ../../certificates/data-prepper/server-cert.pem:/usr/share/data-prepper/server-cert.pem
+      - ../../certificates/data-prepper/private-key.pem:/usr/share/data-prepper/private-key.pem
     ports:
       - "2021:2021"
     networks:
@@ -19,8 +19,8 @@ services:
     container_name: fluent-bit
     image: fluent/fluent-bit
     volumes:
-      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
-      - ./fluent-bit/logs/:/var/log/samples/
+      - ../fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ../fluent-bit/logs/:/var/log/samples/
     networks:
       - sample_network
     depends_on:

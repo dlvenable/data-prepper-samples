@@ -1,0 +1,27 @@
+log-pipeline:
+  source:
+    http:
+      ssl: true
+      ssl_certificate_file: "/usr/share/data-prepper/server-cert.pem"
+      ssl_key_file: "/usr/share/data-prepper/private-key.pem"
+  processor:
+    - grok:
+        match:
+          log:
+            - "%{TIMESTAMP_ISO8601:timestamp} %{NOTSPACE:network_node} %{NOTSPACE:network_host} %{IPORHOST:source_ip}:%{NUMBER:source_port:int} -> %{IPORHOST:destination_ip}:%{NUMBER:destination_port:int} %{GREEDYDATA:details}"
+    - grok:
+        match:
+          details:
+            - "'%{NOTSPACE:http_method} %{NOTSPACE:http_uri}' %{NOTSPACE:protocol}"
+            - "TLS%{NOTSPACE:tls_version} %{GREEDYDATA:encryption}"
+            - "%{NUMBER:status_code:int} %{NUMBER:response_size:int}"
+    - delete_entries:
+        with_keys: ["details", "log"]
+  sink:
+    - opensearch:
+        hosts: [ "https://opensearch:9200" ]
+        insecure: true
+        username: admin
+        password: admin
+        index_type: custom
+        index: network_activity_raw
