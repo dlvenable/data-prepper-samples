@@ -8,7 +8,20 @@ log-pipeline:
     - grok:
         match:
           log:
-            - "%{IPORHOST:sourceIp} %{IPORHOST:destinationIp} %{NUMBER:port:int} %{NUMBER:size:int}"
+            - "%{NOTSPACE:node} %{IPORHOST:source_ip}:%{NUMBER:source_port:int} -> %{IPORHOST:destination_ip}:%{NUMBER:destination_port:int} %{GREEDYDATA:details}"
+    - grok:
+        match:
+          details:
+            - "'%{NOTSPACE:http_method} %{NOTSPACE:http_uri}' %{NOTSPACE:protocol}"
+            - "TLS%{NOTSPACE:tls_version} %{GREEDYDATA:encryption}"
+            - "%{NUMBER:status_code:int} %{NUMBER:response_size:int}"
+    - aggregate:
+        group_duration: "20s"
+        identification_keys: ["source_ip", "destination_ip", "source_port"]
+        action:
+          put_all:
+    - delete_entries:
+        with_keys: ["details"]
   sink:
     - opensearch:
         hosts: [ "https://opensearch:9200" ]
