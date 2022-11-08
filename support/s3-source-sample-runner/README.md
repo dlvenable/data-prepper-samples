@@ -1,9 +1,9 @@
 # S3 Source Sample Runner
 
-This is a simple script which exercises the [s3-source-sample](../../sample-apps/s3-source-sample) API. You can use
+This is a simple script which exercises the [s3-source-sample](../s3-source-sample) API. You can use
 it to generate some load on an s3-source-sample app running behind an ALB. This will generate ALB logs that
-Data Prepper can read. You can create a Data Prepper cluster per [s3-source-alb](../s3-source-alb) to process
-those ALB logs.
+Data Prepper can read. You can create a Data Prepper cluster per [s3-source-alb](../../samples/s3-source-alb) 
+to process those ALB logs.
 
 ### Run locally
 
