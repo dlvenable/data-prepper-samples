@@ -20,7 +20,9 @@ export class LoadBalancerLogsStack extends cdk.Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
-    const eventQueue = new Queue(this, 'LoadBalancerEventQueue');
+    const eventQueue = new Queue(this, 'LoadBalancerEventQueue', {
+      queueName: 'LoadBalancer'
+    });
 
     this.accessLogsBucket.addEventNotification(EventType.OBJECT_CREATED, new SqsDestination(eventQueue));
 
