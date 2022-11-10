@@ -3,9 +3,9 @@ services:
   data-prepper:
     restart: unless-stopped
     container_name: data-prepper
-    image: opensearchproject/data-prepper:1
+    image: opensearchproject/data-prepper:2
     volumes:
-      - ./data-prepper/pipelines.yaml:/usr/share/data-prepper/pipelines.yaml
+      - ./data-prepper/s3-log-pipeline.yaml:/usr/share/data-prepper/pipelines/s3-log-pipeline.yaml
       - ${HOME}/.aws:/root/.aws
     ports:
       - "4900:4900"
