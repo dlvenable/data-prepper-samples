@@ -7,6 +7,15 @@ to process those ALB logs.
 
 ### Run locally
 
+Setup step for Python.
+
+```
+python3 -m venv .venv
+python3 -m pip install -r requirements.txt
+```
+
+Run it!
+
 ```
 ./runner.py {YOUR_BASE_URI}
 ```
