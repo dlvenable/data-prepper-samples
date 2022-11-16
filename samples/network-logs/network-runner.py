@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from datetime import datetime
@@ -22,7 +22,7 @@ endpoints = [
 
 for n in range(10):
     datetime = datetime.now()
-    source_port = long(random.choice(range(10000,59999)))
+    source_port = random.choice(range(10000,59999))
     source_ip = "{0}.{1}.{2}.{3}".format(
         random.choice(range(100, 255)),
         random.choice(range(100, 255)),

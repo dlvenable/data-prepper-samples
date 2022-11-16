@@ -2,8 +2,8 @@ log-pipeline:
   source:
     http:
       ssl: true
-      ssl_certificate_file: "/usr/share/data-prepper/server-cert.pem"
-      ssl_key_file: "/usr/share/data-prepper/private-key.pem"
+      ssl_certificate_file: "/usr/share/data-prepper/config/server-cert.pem"
+      ssl_key_file: "/usr/share/data-prepper/config/private-key.pem"
   processor:
     - grok:
         match:
