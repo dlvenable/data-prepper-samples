@@ -4,3 +4,11 @@ build
 *.iml
 
 xray-daemon
+
+# Python
+.venv
+
+# CDK
+cdk.out
+node_modules
+bin
