@@ -10,7 +10,7 @@ services:
     ports:
       - "4900:4900"
     networks:
-      - sample_network
+      - s3-source-alb
     depends_on:
       - "opensearch"
   opensearch:
@@ -30,8 +30,10 @@ services:
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
     networks:
-      - sample_network
+      - s3-source-alb
   dashboards:
     image: opensearchproject/opensearch-dashboards:2
     container_name: opensearch-dashboards
@@ -44,6 +46,10 @@ services:
     depends_on:
       - opensearch
     networks:
-      - sample_network
+      - s3-source-alb
+
+volumes:
+  opensearch-data:
+
 networks:
-  sample_network:
+  s3-source-alb:
