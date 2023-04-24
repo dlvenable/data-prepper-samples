@@ -14,16 +14,31 @@ log-pipeline:
   processor:
     - grok:
         match:
-          message: ["%{DATA:type} %{TIMESTAMP_ISO8601:time} %{DATA:elb} %{DATA:client} %{DATA:target} %{BASE10NUM:request_processing_time} %{DATA:target_processing_time} %{BASE10NUM:response_processing_time} %{BASE10NUM:elb_status_code} %{DATA:target_status_code} %{BASE10NUM:received_bytes} %{BASE10NUM:sent_bytes} \"%{DATA:request}\" \"%{DATA:user_agent}\" %{DATA:ssl_cipher} %{DATA:ssl_protocol} %{DATA:target_group_arn} \"%{DATA:trace_id}\" \"%{DATA:domain_name}\" \"%{DATA:chosen_cert_arn}\" %{DATA:matched_rule_priority} %{TIMESTAMP_ISO8601:request_creation_time} \"%{DATA:actions_executed}\" \"%{DATA:redirect_url}\" \"%{DATA:error_reason}\" \"%{DATA:target_list}\" \"%{DATA:target_status_code_list}\" \"%{DATA:classification}\" \"%{DATA:classification_reason}"]
-    - grok:
-        match:
-          request: ["(%{NOTSPACE:http_method})? (%{NOTSPACE:http_uri})? (%{NOTSPACE:http_version})?"]
-    - grok:
-        match:
-          http_uri: ["(%{WORD:protocol})?(://)?(%{IPORHOST:domain})?(:)?(%{INT:http_port})?(%{GREEDYDATA:request_uri})?"]
-    - date:
-        from_time_received: true
-        destination: "@timestamp"
+          message: ["%{ALB_ACCESS_LOG}"]
+    - copy_values:
+        entries:
+          - from_key: time
+            to_key: "@timestamp"
+    - split_string:
+        entries:
+          - source: client
+            delimiter_regex: ":"
+          - source: target
+            delimiter_regex: ":"
+    - copy_values:
+        entries:
+          - from_key: client/0
+            to_key: "client_ip"
+          - from_key: client/1
+            to_key: "client_port"
+          - from_key: target/0
+            to_key: "target_ip"
+          - from_key: target/1
+            to_key: "target_port"
+    - delete_entries:
+        with_keys:
+          - client
+          - target
 
 
   sink:
