@@ -4,6 +4,7 @@ import {BlockPublicAccess, Bucket, EventType, IBucket} from "aws-cdk-lib/aws-s3"
 import {CfnOutput, RemovalPolicy} from "aws-cdk-lib";
 import {Queue} from "aws-cdk-lib/aws-sqs";
 import {SqsDestination} from "aws-cdk-lib/aws-s3-notifications";
+import {AccountPrincipal, Role} from "aws-cdk-lib/aws-iam";
 
 export class LoadBalancerLogsStack extends cdk.Stack {
   public readonly accessLogsBucket: IBucket;
@@ -26,12 +27,22 @@ export class LoadBalancerLogsStack extends cdk.Stack {
 
     this.accessLogsBucket.addEventNotification(EventType.OBJECT_CREATED, new SqsDestination(eventQueue));
 
+    const dataPrepperRole = new Role(this, 'DataPrepperRole', {
+      assumedBy: new AccountPrincipal(accountId)
+    });
+    eventQueue.grantConsumeMessages(dataPrepperRole);
+    this.accessLogsBucket.grantRead(dataPrepperRole);
+
     new CfnOutput(this, 'LoadBalancerBucketName', {
       value: this.accessLogsBucket.bucketName
     });
 
     new CfnOutput(this, 'LoadBalancerEventQueueUrl', {
       value: eventQueue.queueUrl
+    });
+
+    new CfnOutput(this, 'DataPrepperRoleArn', {
+      value: dataPrepperRole.roleArn
     });
   }
 }
