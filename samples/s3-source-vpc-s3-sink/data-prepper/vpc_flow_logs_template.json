@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "mappings": {
+    "_source": {
+      "enabled": true
+    },
+    "properties": {
+      "action": {
+        "ignore_above": 32,
+        "type": "keyword"
+      },
+      "log-status": {
+        "ignore_above": 32,
+        "type": "keyword"
+      },
+      "srcaddr": {
+        "type": "ip"
+      },
+      "dstaddr": {
+        "type": "ip"
+      },
+      "start": {
+        "type": "date",
+        "format" : "epoch_second"
+      },
+      "end": {
+        "type": "date",
+        "format" : "epoch_second"
+      }
+    }
+  }
+}

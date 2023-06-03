@@ -1,0 +1,107 @@
+log-pipeline:
+  source:
+    s3:
+      notification_type: sqs
+      compression: gzip
+      codec:
+        csv:
+          delimiter: ' '
+      sqs:
+        queue_url: "QUEUE_URL"
+      aws:
+        region: us-east-1
+        sts_role_arn: "IAM_ROLE"
+
+  processor:
+    - delete_entries:
+        with_keys:
+          - version
+        delete_when: '/version == "-"'
+    - convert_entry_type:
+        key: version
+        type: integer
+    - delete_entries:
+        with_keys:
+          - start
+        delete_when: '/start == "-"'
+    - convert_entry_type:
+        key: start
+        type: integer
+    - delete_entries:
+        with_keys:
+          - end
+        delete_when: '/end == "-"'
+    - convert_entry_type:
+        key: end
+        type: integer
+    - delete_entries:
+        with_keys:
+          - dstport
+        delete_when: '/dstport == "-"'
+    - convert_entry_type:
+        key: dstport
+        type: integer
+    - delete_entries:
+        with_keys:
+          - srcport
+        delete_when: '/srcport == "-"'
+    - convert_entry_type:
+        key: srcport
+        type: integer
+    - delete_entries:
+        with_keys:
+          - protocol
+        delete_when: '/protocol == "-"'
+    - convert_entry_type:
+        key: protocol
+        type: integer
+    - delete_entries:
+        with_keys:
+          - bytes
+        delete_when: '/bytes == "-"'
+    - convert_entry_type:
+        key: bytes
+        type: integer
+    - delete_entries:
+        with_keys:
+          - packets
+        delete_when: '/packets == "-"'
+    - convert_entry_type:
+        key: packets
+        type: integer
+
+    - delete_entries:
+        with_keys:
+          - srcaddr
+        delete_when: '/srcaddr == "-"'
+    - delete_entries:
+        with_keys:
+          - dstaddr
+        delete_when: '/dstaddr == "-"'
+
+    - delete_entries:
+        with_keys:
+          - s3
+
+
+  sink:
+    - opensearch:
+        hosts: ["https://opensearch:9200"]
+        insecure: true
+        username: "admin"
+        password: "admin"
+        index: vpc_flow_logs
+        template_file: /usr/share/data-prepper/vpc_flow_logs_template.json
+    - s3:
+        aws:
+          region: us-east-1
+          sts_role_arn: "IAM_ROLE"
+        bucket: "BUCKET_NAME"
+        object_key:
+          path_prefix: vpc-flow-logs/%{yyyy}/%{MM}/%{dd}/%{HH}/
+        codec:
+          ndjson:
+        threshold:
+          event_count: 50000
+          maximum_size: 10mb
+          event_collect_timeout: PT5M
