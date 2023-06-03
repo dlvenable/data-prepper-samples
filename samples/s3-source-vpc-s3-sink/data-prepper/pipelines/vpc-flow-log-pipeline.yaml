@@ -83,9 +83,13 @@ log-pipeline:
         with_keys:
           - s3
 
+  route:
+    - non_internal: 'not cidrContains(/srcaddr, "10.0.0.0/16")'
 
   sink:
     - opensearch:
+        routes:
+          - non_internal
         hosts: ["https://opensearch:9200"]
         insecure: true
         username: "admin"

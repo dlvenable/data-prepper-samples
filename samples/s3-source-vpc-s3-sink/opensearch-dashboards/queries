@@ -1,0 +1,17 @@
+GET vpc_flow_logs/_search
+{
+  "query": {
+    "term": {
+      "srcaddr": "10.0.0.0/16"
+    }
+  }
+}
+
+GET vpc_flow_logs/_search
+{
+  "query": {
+    "term": {
+      "dstaddr": "10.0.0.0/16"
+    }
+  }
+}

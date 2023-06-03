@@ -1,6 +1,11 @@
 # S3 source from VPC with S3 sink
 
-This sample will get VPC FlowLogs from S3. It writes them to S3 as well.
+This sample will get VPC FlowLogs from S3.
+
+It normalizes the events.
+Then all events which originated from outside the VPC (internal network), go to OpenSearch.
+Events which originated from inside the VPC will not go to OpenSearch.
+All events go to the S3 sink.
 
 ## Initial setup
 
