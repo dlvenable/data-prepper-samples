@@ -4,12 +4,17 @@ import {BlockPublicAccess, Bucket, EventType, IBucket} from "aws-cdk-lib/aws-s3"
 import {CfnOutput, RemovalPolicy} from "aws-cdk-lib";
 import {Queue} from "aws-cdk-lib/aws-sqs";
 import {SqsDestination} from "aws-cdk-lib/aws-s3-notifications";
-import {AccountPrincipal, Role} from "aws-cdk-lib/aws-iam";
+import {Role} from "aws-cdk-lib/aws-iam";
+
+interface LoadBalancerLogsStackProps extends cdk.StackProps {
+  readonly dataPrepperRole: Role;
+}
 
 export class LoadBalancerLogsStack extends cdk.Stack {
   public readonly accessLogsBucket: IBucket;
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+
+  constructor(scope: Construct, id: string, props: LoadBalancerLogsStackProps) {
     super(scope, id, props);
 
     const accountId = cdk.Stack.of(this).account;
@@ -27,11 +32,8 @@ export class LoadBalancerLogsStack extends cdk.Stack {
 
     this.accessLogsBucket.addEventNotification(EventType.OBJECT_CREATED, new SqsDestination(eventQueue));
 
-    const dataPrepperRole = new Role(this, 'DataPrepperRole', {
-      assumedBy: new AccountPrincipal(accountId)
-    });
-    eventQueue.grantConsumeMessages(dataPrepperRole);
-    this.accessLogsBucket.grantRead(dataPrepperRole);
+    eventQueue.grantConsumeMessages(props.dataPrepperRole);
+    this.accessLogsBucket.grantRead(props.dataPrepperRole);
 
     new CfnOutput(this, 'LoadBalancerBucketName', {
       value: this.accessLogsBucket.bucketName
@@ -39,10 +41,6 @@ export class LoadBalancerLogsStack extends cdk.Stack {
 
     new CfnOutput(this, 'LoadBalancerEventQueueUrl', {
       value: eventQueue.queueUrl
-    });
-
-    new CfnOutput(this, 'DataPrepperRoleArn', {
-      value: dataPrepperRole.roleArn
     });
   }
 }

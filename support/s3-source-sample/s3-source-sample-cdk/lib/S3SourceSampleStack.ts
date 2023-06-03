@@ -14,6 +14,8 @@ interface S3SourceSampleStackProps extends cdk.StackProps {
 }
 
 export class S3SourceSampleStack extends cdk.Stack {
+  public readonly vpc: Vpc;
+
   constructor(scope: Construct, id: string, props: S3SourceSampleStackProps) {
     super(scope, id, props);
 
@@ -21,14 +23,14 @@ export class S3SourceSampleStack extends cdk.Stack {
       directory: path.join(__dirname, '../..'),
     });
 
-    const vpc = new Vpc(this, 'Vpc');
+    this.vpc = new Vpc(this, 'Vpc');
 
     const cluster = new Cluster(this, 'S3SourceSampleCluster', {
-      vpc: vpc
+      vpc: this.vpc
     });
 
     const loadBalancer = new ApplicationLoadBalancer(this, 'LoadBalancer', {
-      vpc: vpc,
+      vpc: this.vpc,
       internetFacing: true
     });
 
