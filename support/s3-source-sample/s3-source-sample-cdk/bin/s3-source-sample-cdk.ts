@@ -5,6 +5,7 @@ import { S3SourceSampleStack } from '../lib/S3SourceSampleStack';
 import { LoadBalancerLogsStack } from '../lib/LoadBalancerLogs';
 import {VpcFlowLogs} from "../lib/VpcFlowLogs";
 import {DataPrepperAccessStack} from "../lib/DataPrepperAccessStack";
+import {S3SinkStack} from "../lib/S3SinkStack";
 
 const app = new cdk.App();
 
@@ -31,6 +32,13 @@ let s3SourceSampleStack = new S3SourceSampleStack(app, 'S3SourceSampleStack', {
 new VpcFlowLogs(app, 'SampleVpcFlowLogsStack', {
   dataPrepperRole: dataPrepperAccessStack.dataPrepperRole,
   vpc: s3SourceSampleStack.vpc,
+  env: {
+    region: process.env.CDK_DEFAULT_REGION
+  }
+});
+
+new S3SinkStack(app, 'S3SinkStack', {
+  dataPrepperRole: dataPrepperAccessStack.dataPrepperRole,
   env: {
     region: process.env.CDK_DEFAULT_REGION
   }
