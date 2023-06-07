@@ -13,6 +13,12 @@ vpc-flow-log-pipeline:
         sts_role_arn: "IAM_ROLE"
 
   processor:
+    # Each of these combinations of delete_entries and convert_entry_type are helping convert
+    # strings into integers. The delete_entries are needed because the conversion processor
+    # will fail to convert '-'.
+    # See https://github.com/opensearch-project/data-prepper/issues/2822 for an alternative.
+    # Also, see https://github.com/opensearch-project/data-prepper/issues/2823 for another
+    # possible extension which could combined with 2822 could really help condense this.
     - delete_entries:
         with_keys:
           - version
@@ -70,6 +76,8 @@ vpc-flow-log-pipeline:
         key: packets
         type: integer
 
+    # Providing a '-' to OpenSearch will result in a failure because OpenSearch is
+    # expecting an IP address. Remove any entries which are not IP addresses.
     - delete_entries:
         with_keys:
           - srcaddr
@@ -79,6 +87,7 @@ vpc-flow-log-pipeline:
           - dstaddr
         delete_when: '/dstaddr == "-"'
 
+    # I'm deleting this because we don't need it in this example.
     - delete_entries:
         with_keys:
           - s3
