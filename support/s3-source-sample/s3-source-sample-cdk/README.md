@@ -1,10 +1,17 @@
 # S3 Source Sample CDK
 
-CDK application for deploying the S3 Source Sample.
+CDK application for deploying the S3 Source Sample. 
+Several of the Data Prepper samples require this stack.
 
-First, build the project using Gradle.
+1) Build the project using Gradle. Go the root of the project and run:
 
-NOTE: You must set `CDK_DEFAULT_REGION` to the same value as the region in your AWS profile.
+```
+./gradlew build
+```
+
+2) Deploy the CDK stack
+
+**NOTE**: You must set `CDK_DEFAULT_REGION` to the same value as the region in your AWS profile.
 
 ```
 export CDK_DEFAULT_REGION={YOUR_REGION} 
@@ -12,9 +19,22 @@ cdk synth --all
 cdk deploy --all --require-approval never
 ```
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+### Cleaning up
 
-## Useful commands
+
+```
+cdk destroy --all
+```
+
+You may have to delete the `DataPrepperAccessStack` first.
+
+```
+cdk destroy DataPrepperAccessStack
+cdk destroy --all
+```
+
+
+## Useful commands (from auto-generated README)
 
 * `npm run build`   compile typescript to js
 * `npm run watch`   watch for changes and compile
