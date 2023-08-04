@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  data-prepper:
+    restart: unless-stopped
+    container_name: data-prepper
+    image: opensearch-data-prepper:2.4.0-SNAPSHOT
+    volumes:
+      - ./data-prepper/pipelines:/usr/share/data-prepper/pipelines
+      - ${HOME}/.aws:/root/.aws
+    ports:
+      - "4900:4900"

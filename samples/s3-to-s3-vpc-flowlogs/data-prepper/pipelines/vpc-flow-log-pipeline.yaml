@@ -1,0 +1,139 @@
+vpc-flow-log-pipeline:
+  source:
+    s3:
+      notification_type: sqs
+      compression: gzip
+      codec:
+        csv:
+          delimiter: ' '
+      sqs:
+        queue_url: "https://sqs.us-east-2.amazonaws.com/ACCOUNTID/SampleVpcFlowLogsStack-VpcFlowLogEventQueueSTACKVALUE"
+      aws:
+        region: us-east-2
+        sts_role_arn: "arn:aws:iam::ACCOUNTID:role/DataPrepperAccessStack-DataPrepperRoleSTACKVALUE"
+
+  processor:
+    # Each of these combinations of delete_entries and convert_entry_type are helping convert
+    # strings into integers. The delete_entries are needed because the conversion processor
+    # will fail to convert '-'.
+    # See https://github.com/opensearch-project/data-prepper/issues/2822 for an alternative.
+    # Also, see https://github.com/opensearch-project/data-prepper/issues/2823 for another
+    # possible extension which could combined with 2822 could really help condense this.
+    - delete_entries:
+        with_keys:
+          - version
+        delete_when: '/version == "-"'
+    - convert_entry_type:
+        key: version
+        type: integer
+    - delete_entries:
+        with_keys:
+          - start
+        delete_when: '/start == "-"'
+    - convert_entry_type:
+        key: start
+        type: integer
+    - delete_entries:
+        with_keys:
+          - end
+        delete_when: '/end == "-"'
+    - convert_entry_type:
+        key: end
+        type: integer
+    - delete_entries:
+        with_keys:
+          - dstport
+        delete_when: '/dstport == "-"'
+    - convert_entry_type:
+        key: dstport
+        type: integer
+    - delete_entries:
+        with_keys:
+          - srcport
+        delete_when: '/srcport == "-"'
+    - convert_entry_type:
+        key: srcport
+        type: integer
+    - delete_entries:
+        with_keys:
+          - protocol
+        delete_when: '/protocol == "-"'
+    - convert_entry_type:
+        key: protocol
+        type: integer
+    - delete_entries:
+        with_keys:
+          - bytes
+        delete_when: '/bytes == "-"'
+    - convert_entry_type:
+        key: bytes
+        type: integer
+    - delete_entries:
+        with_keys:
+          - packets
+        delete_when: '/packets == "-"'
+    - convert_entry_type:
+        key: packets
+        type: integer
+
+    # Providing a '-' to OpenSearch will result in a failure because OpenSearch is
+    # expecting an IP address. Remove any entries which are not IP addresses.
+    - delete_entries:
+        with_keys:
+          - srcaddr
+        delete_when: '/srcaddr == "-"'
+    - delete_entries:
+        with_keys:
+          - dstaddr
+        delete_when: '/dstaddr == "-"'
+
+    # I'm deleting this because we don't need it in this example.
+    - delete_entries:
+        with_keys:
+          - s3
+
+    - rename_keys:
+        entries:
+          - from_key: account-id
+            to_key: accountId
+          - from_key: interface-id
+            to_key: interfaceId
+          - from_key: log-status
+            to_key: logStatus
+
+  sink:
+    - s3:
+        aws:
+          region: us-east-2
+          sts_role_arn: "arn:aws:iam::ACCOUNTID:role/DataPrepperAccessStack-DataPrepperRoleSTACKVALUE"
+        bucket: "s3sinkstack-s3sinkbucketSTACKVALUE"
+        object_key:
+          path_prefix: vpc-flow-logs/%{yyyy}/%{MM}/%{dd}/%{HH}/
+        codec:
+          avro:
+            schema: >
+              {
+                "type" : "record",
+                "namespace" : "org.opensearch.dataprepper.examples",
+                "name" : "VpcFlowLog",
+                "fields" : [
+                  { "name" : "version", "type" : ["null", "string"]},
+                  { "name" : "srcport", "type": ["null", "int"]},
+                  { "name" : "dstport", "type": ["null", "int"]},
+                  { "name" : "accountId", "type" : ["null", "string"]},
+                  { "name" : "interfaceId", "type" : ["null", "string"]},
+                  { "name" : "srcaddr", "type" : ["null", "string"]},
+                  { "name" : "dstaddr", "type" : ["null", "string"]},
+                  { "name" : "start", "type": ["null", "int"]},
+                  { "name" : "end", "type": ["null", "int"]},
+                  { "name" : "protocol", "type": ["null", "int"]},
+                  { "name" : "packets", "type": ["null", "int"]},
+                  { "name" : "bytes", "type": ["null", "int"]},
+                  { "name" : "action", "type": ["null", "string"]},
+                  { "name" : "logStatus", "type" : ["null", "string"]}
+                ]
+              }
+        threshold:
+          event_count: 50000
+          maximum_size: 10mb
+          event_collect_timeout: PT5M
