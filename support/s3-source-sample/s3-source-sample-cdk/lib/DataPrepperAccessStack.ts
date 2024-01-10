@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import {CfnOutput} from "aws-cdk-lib";
 import {AccountPrincipal, Role} from "aws-cdk-lib/aws-iam";
+import {Metric} from "aws-cdk-lib/aws-cloudwatch";
 
 interface DataPrepperAccessStackProps extends cdk.StackProps {
 }
@@ -22,5 +23,7 @@ export class DataPrepperAccessStack extends cdk.Stack {
     new CfnOutput(this, 'DataPrepperRoleArn', {
       value: this.dataPrepperRole.roleArn
     });
+
+    Metric.grantPutMetricData(this.dataPrepperRole);
   }
 }
