@@ -6,7 +6,10 @@ services:
     image: opensearchproject/data-prepper:2
     volumes:
       - ./data-prepper/s3-log-pipeline.yaml:/usr/share/data-prepper/pipelines/s3-log-pipeline.yaml
+      - ./data-prepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
       - ${HOME}/.aws:/root/.aws
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE}
     ports:
       - "4900:4900"
     networks:
