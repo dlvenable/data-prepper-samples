@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as path from "path";
-import {DockerImageAsset} from "aws-cdk-lib/aws-ecr-assets";
-import {AwsLogDriver, Cluster, ContainerImage} from "aws-cdk-lib/aws-ecs";
+import {DockerImageAsset, Platform} from "aws-cdk-lib/aws-ecr-assets";
+import {AwsLogDriver, Cluster, ContainerImage, CpuArchitecture} from "aws-cdk-lib/aws-ecs";
 import {ApplicationLoadBalancedFargateService} from "aws-cdk-lib/aws-ecs-patterns";
 import {ApplicationLoadBalancer} from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import {Vpc} from "aws-cdk-lib/aws-ec2";
@@ -21,6 +21,7 @@ export class S3SourceSampleStack extends cdk.Stack {
 
     const dockerImage = new DockerImageAsset(this, 'S3SourceSampleImage', {
       directory: path.join(__dirname, '../..'),
+      platform: Platform.LINUX_ARM64
     });
 
     this.vpc = new Vpc(this, 'Vpc');
@@ -45,8 +46,11 @@ export class S3SourceSampleStack extends cdk.Stack {
         image: ContainerImage.fromDockerImageAsset(dockerImage),
         containerPort: 8080,
         logDriver: new AwsLogDriver({
-          streamPrefix: 's3-source-sample/'
+          streamPrefix: 's3-source-sample'
         })
+      },
+      runtimePlatform: {
+        cpuArchitecture: CpuArchitecture.ARM64
       },
       publicLoadBalancer: true,
       loadBalancer: loadBalancer,
