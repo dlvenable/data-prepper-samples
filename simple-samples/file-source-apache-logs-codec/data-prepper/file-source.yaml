@@ -1,0 +1,15 @@
+simple-sample-pipeline:
+  workers: 2
+  delay: 5000
+  source:
+    file:
+      path: /usr/share/data-prepper-input-files/apache.http.log
+      codec:
+        newline:
+
+  processor:
+    - grok:
+        match:
+          message: [ "%{COMMONAPACHELOG}" ]
+  sink:
+    - stdout:
