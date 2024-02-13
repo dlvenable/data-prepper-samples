@@ -1,0 +1,27 @@
+services:
+  prometheus:
+    restart: unless-stopped
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ${PWD}/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - '9090:9090'
+    networks:
+      - prometheus
+
+  graphana:
+    restart: unless-stopped
+    container_name: grafana
+    image: grafana/grafana-oss:latest
+    volumes:
+      - ${PWD}/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - '3000:3000'
+    networks:
+      - prometheus
+    depends_on:
+      - prometheus
+
+networks:
+  prometheus:
