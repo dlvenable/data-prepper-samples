@@ -1,0 +1,30 @@
+simple-sample-pipeline:
+  workers: 2
+  source:
+    file:
+      path: /usr/share/data-prepper-input-files/sample.json
+      codec:
+        json:
+
+  processor:
+    - split_string:
+        entries:
+          - delimiter: '|'
+            source: splitTime
+    # Now this looks like:  {"splitTime":["abcdefg","20240219"]}
+
+    - copy_values:
+        entries:
+          - from_key: splitTime/1
+            to_key: splitTime
+            overwrite_if_to_key_exists: true
+    # Not this looks like: {"splitTime":"20240219"}
+
+    #- add_entries:
+    #    entries:
+    #      - key: splitTime
+    #        value_expression: '/splitTime[1]'
+    #        overwrite_if_key_exists: true
+
+  sink:
+    - stdout:
