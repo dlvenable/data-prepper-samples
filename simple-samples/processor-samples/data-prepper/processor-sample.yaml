@@ -20,6 +20,12 @@ simple-sample-pipeline:
             overwrite_if_to_key_exists: true
     # Not this looks like: {"splitTime":"20240219"}
 
+    - add_entries:
+        entries:
+          - value_expression: /name.with.dots
+            key: name_without_dots
+
+
     #- add_entries:
     #    entries:
     #      - key: splitTime
@@ -28,3 +34,14 @@ simple-sample-pipeline:
 
   sink:
     - stdout:
+
+    # Need to run:
+    # docker run -d -p 9200:9200 -p 9600:9600 -e "discovery.type=single-node" opensearchproject/opensearch:2.11.1
+
+    #- opensearch:
+    #    hosts: ["https://host.docker.internal:9200"]
+    #    insecure: true
+    #    username: "admin"
+    #    password: "admin"
+    #    index: test-${name.with.dots}
+    #    flush_timeout: 5

@@ -4,6 +4,7 @@ services:
     restart: unless-stopped
     container_name: data-prepper
     image: opensearch-data-prepper:2.7.0-SNAPSHOT
+    #image: opensearchproject/data-prepper:2
     volumes:
       - ./data-prepper/processor-sample.yaml:/usr/share/data-prepper/pipelines/processor-sample.yaml
       - ./input-files:/usr/share/data-prepper-input-files

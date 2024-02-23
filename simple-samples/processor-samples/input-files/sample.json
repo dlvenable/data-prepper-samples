@@ -1,10 +1,12 @@
 {
   "data": [
     {
-      "splitTime" : "abcdefg|20240219"
+      "splitTime" : "abcdefg|20240219",
+      "name.with.dots" : "test1"
     },
     {
-      "splitTime" : "hijklmn|20240220"
+      "splitTime" : "hijklmn|20240220",
+      "name.with.dots" : "test2"
     }
   ]
 }
