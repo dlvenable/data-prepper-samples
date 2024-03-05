@@ -1,0 +1,15 @@
+ssl: true
+keyStoreFilePath: "/usr/share/data-prepper/keystore.p12"
+keyStorePassword: "password"
+privateKeyPassword: "password"
+serverPort: 4900
+authentication:
+  http_basic:
+    username: admin
+    password: admin
+
+extensions:
+  geoip_service:
+    maxmind:
+      databases:
+        city: https://geoip.maps.opensearch.org/v1/mmdb/geolite2-city/manifest.json

@@ -1,0 +1,23 @@
+apache-geoip-pipeline:
+  workers: 2
+  delay: 100
+  source:
+    file:
+      path: /usr/share/data-prepper-input-files/apache.http.log
+      codec:
+        newline:
+
+  processor:
+    - grok:
+        match:
+          message: [ "%{COMMONAPACHELOG_DATATYPED}" ]
+    - geoip:
+        entries:
+          - source: clientip
+            target: location
+            include_fields: [latitude, longitude]
+        tags_on_ip_not_found: ['no_ip']
+
+  sink:
+    - stdout:
+        tags_target_key: tags

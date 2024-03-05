@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  data-prepper:
+    #restart: unless-stopped
+    container_name: data-prepper
+    image: opensearch-data-prepper:2.7.0-SNAPSHOT
+    #image: opensearchproject/data-prepper:2
+    volumes:
+      - ./data-prepper/pipelines:/usr/share/data-prepper/pipelines
+      - ./data-prepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+      - ./input-files:/usr/share/data-prepper-input-files
+      - ../../samples/certificates/data-prepper/server-cert.pem:/usr/share/data-prepper/config/server-cert.pem
+      - ../../samples/certificates/data-prepper/private-key.pem:/usr/share/data-prepper/config/private-key.pem
+      - ./data-prepper/log4j2-rolling.properties:/usr/share/data-prepper/config/log4j2-rolling.properties
+    ports:
+      - "2021:2021"
+      - "4900:4900"
+    networks:
+      - sample_network
+
+networks:
+  sample_network:
