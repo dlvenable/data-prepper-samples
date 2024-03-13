@@ -2,22 +2,48 @@ apache-geoip-pipeline:
   workers: 2
   delay: 100
   source:
-    file:
-      path: /usr/share/data-prepper-input-files/apache.http.log
-      codec:
-        newline:
+    http:
 
   processor:
     - grok:
         match:
-          message: [ "%{COMMONAPACHELOG_DATATYPED}" ]
+          log: [ "%{COMMONAPACHELOG_DATATYPED}" ]
+    - delete_entries:
+        with_keys: [auth, ident, httpversion]
+
     - geoip:
         entries:
           - source: clientip
-            target: location
-            include_fields: [latitude, longitude]
+            target: client_location_info
+            include_fields: [location, postal_code, country_name, city_name]
+          - source: clientip
+            target: client_asn
+            include_fields: [asn, asn_organization, network]
         tags_on_ip_not_found: ['no_ip']
+    - copy_values:
+        entries:
+          - from_key: /client_location_info/location
+            to_key: client_location
 
   sink:
-    - stdout:
+    - opensearch:
+        hosts: ['https://opensearch:9200']
+        insecure: true
+        username: admin
+        password: admin
+        index: apache_geoip
         tags_target_key: tags
+        flush_timeout: -1
+        template_type: index-template
+        template_content: >
+          {
+            "template" : {
+              "mappings" : {
+                "properties" : {
+                  "client_location" : {
+                    "type" : "geo_point"
+                  }
+                }
+              }
+            }
+          }
