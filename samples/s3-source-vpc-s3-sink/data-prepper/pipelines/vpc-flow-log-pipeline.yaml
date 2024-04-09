@@ -92,6 +92,15 @@ vpc-flow-log-pipeline:
         with_keys:
           - s3
 
+    - rename_keys:
+        entries:
+          - from_key: account-id
+            to_key: accountId
+          - from_key: interface-id
+            to_key: interfaceId
+          - from_key: log-status
+            to_key: logStatus
+
   route:
     - non_internal: 'not cidrContains(/srcaddr, "10.0.0.0/16")'
 
