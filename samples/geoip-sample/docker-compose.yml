@@ -3,8 +3,8 @@ services:
   data-prepper:
     #restart: unless-stopped
     container_name: data-prepper
-    image: opensearch-data-prepper:2.7.0-SNAPSHOT
-    #image: opensearchproject/data-prepper:2
+    #image: opensearch-data-prepper:2.7.0-SNAPSHOT
+    image: opensearchproject/data-prepper:2
     volumes:
       - ./data-prepper/pipelines:/usr/share/data-prepper/pipelines
       - ./data-prepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
