@@ -9,6 +9,7 @@ services:
       - ./data-prepper/config/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
       - ../certificates/data-prepper/server-cert.pem:/usr/share/data-prepper/config/server-cert.pem
       - ../certificates/data-prepper/private-key.pem:/usr/share/data-prepper/config/private-key.pem
+      - opensearch-config:/usr/share/opensearch-test/:ro
     ports:
       - "21892:21892"
       - "4900:4900"
@@ -26,11 +27,14 @@ services:
 
   opensearch:
     container_name: opensearch
-    image: opensearchproject/opensearch:2.11.1
+    image: opensearchproject/opensearch:2.19.1
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=yourStrongPassword123!
+    volumes:
+      - opensearch-config:/usr/share/opensearch/config/
     ulimits:
       memlock:
         soft: -1
@@ -44,7 +48,7 @@ services:
     networks:
       - data-prepper-test
   dashboards:
-    image: opensearchproject/opensearch-dashboards:2.11.1
+    image: opensearchproject/opensearch-dashboards:2.19.1
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
@@ -59,3 +63,6 @@ services:
 
 networks:
   data-prepper-test:
+
+volumes:
+  opensearch-config:

@@ -64,6 +64,6 @@ otel-logs:
         hosts: [ "https://opensearch:9200" ]
         insecure: true
         username: admin
-        password: admin
+        password: yourStrongPassword123!
         index: ss4o_logs
         flush_timeout: -1
