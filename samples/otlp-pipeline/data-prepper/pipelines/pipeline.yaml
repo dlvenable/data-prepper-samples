@@ -1,0 +1,83 @@
+version: "2"
+otel-telemetry:
+  source:
+    otlp:
+      ssl: false
+
+  route:
+    - traces: 'getEventType() == "TRACE"'
+    - logs: 'getEventType() == "LOG"'
+    - metrics: 'getEventType() == "METRIC"'
+
+  sink:
+    - opensearch:
+        routes:
+          - logs
+        hosts: [ "https://opensearch:9200" ]
+        index: ss4o_logs-%{yyyy.MM.dd}
+        username: admin
+        password: yourStrongPassword123!
+        insecure: true
+        flush_timeout: -1
+    - pipeline:
+        name: traces-raw
+        routes:
+          - traces
+    - pipeline:
+        name: service-map
+        routes:
+          - traces
+    - pipeline:
+        name: otel-metrics
+        routes:
+          - metrics
+
+traces-raw:
+  source:
+    pipeline:
+      name: otel-telemetry
+  processor:
+    - otel_trace_raw:
+  sink:
+    - opensearch:
+        hosts: [ "https://opensearch:9200" ]
+        index_type: trace-analytics-plain-raw
+        username: admin
+        password: yourStrongPassword123!
+        insecure: true
+        flush_timeout: -1
+
+service-map:
+  delay: "100"
+  source:
+    pipeline:
+      name: otel-telemetry
+  processor:
+    - service_map_stateful:
+  sink:
+    - opensearch:
+        hosts: ["https://opensearch:9200"]
+        index_type: trace-analytics-service-map
+        username: admin
+        password: yourStrongPassword123!
+        insecure: true
+        flush_timeout: -1
+
+otel-metrics:
+  source:
+    pipeline:
+      name: otel-telemetry
+  processor:
+    - otel_metrics:
+        calculate_histogram_buckets: true
+        calculate_exponential_histogram_buckets: true
+        exponential_histogram_max_allowed_scale: 10
+        flatten_attributes: false
+  sink:
+    - opensearch:
+        hosts: [ "https://opensearch:9200" ]
+        index: ss4o_metrics-otel-%{yyyy.MM.dd}
+        username: admin
+        password: yourStrongPassword123!
+        insecure: true
+        flush_timeout: -1

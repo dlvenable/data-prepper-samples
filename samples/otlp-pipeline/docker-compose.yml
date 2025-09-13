@@ -1,0 +1,103 @@
+services:
+  data-prepper:
+    container_name: data-prepper
+    image: public.ecr.aws/opensearchproject/data-prepper:2.12.1
+    depends_on:
+      - opensearch
+    volumes:
+      - ./data-prepper/pipelines:/usr/share/data-prepper/pipelines
+      - ./data-prepper/config/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+      - ./data-prepper/config/log4j2-rolling.properties:/usr/share/data-prepper/config/log4j2-rolling.properties
+      - ../certificates/data-prepper/server-cert.pem:/usr/share/data-prepper/config/server-cert.pem
+      - ../certificates/data-prepper/private-key.pem:/usr/share/data-prepper/config/private-key.pem
+      - opensearch-config:/usr/share/opensearch-test/:ro
+    ports:
+      - "21893:21893"
+      - "4900:4900"
+    networks:
+      - data-prepper-test
+
+  wait-for-data-prepper:
+    image: busybox:latest
+    command: ["/bin/sh", "-c", "until nc -z data-prepper 21893; do echo 'Waiting for data-prepper:21893...'; sleep 1; done; echo 'data-prepper:21893 is available'; sleep 3600"]
+    depends_on:
+      - data-prepper
+    networks:
+      - data-prepper-test
+    healthcheck:
+      test: ["CMD", "nc", "-z", "data-prepper", "21893"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  otel-generator-traces:
+    container_name: otel-generator-traces
+    image: ghcr.io/krzko/otelgen:latest
+    command: ["--otel-exporter-otlp-endpoint", "data-prepper:21893", "--duration", "3600", "--insecure", "traces", "multi"]
+    depends_on:
+      wait-for-data-prepper:
+        condition: service_healthy
+    networks:
+      - data-prepper-test
+
+  otel-generator-logs:
+    container_name: otel-generator-logs
+    image: ghcr.io/krzko/otelgen:latest
+    command: ["--otel-exporter-otlp-endpoint", "data-prepper:21893", "--insecure", "logs", "multi"]
+    depends_on:
+      wait-for-data-prepper:
+        condition: service_healthy
+    networks:
+      - data-prepper-test
+
+  otel-generator-metrics:
+    container_name: otel-generator-metrics
+    image: ghcr.io/krzko/otelgen:latest
+    command: ["--otel-exporter-otlp-endpoint", "data-prepper:21893", "--insecure", "metrics", "sum"]
+    depends_on:
+      wait-for-data-prepper:
+        condition: service_healthy
+    networks:
+      - data-prepper-test
+
+  opensearch:
+    container_name: opensearch
+    image: public.ecr.aws/opensearchproject/opensearch:2.17.1
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=yourStrongPassword123!
+    volumes:
+      - opensearch-config:/usr/share/opensearch/config/
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
+        hard: 65536
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - data-prepper-test
+  dashboards:
+    image: public.ecr.aws/opensearchproject/opensearch-dashboards:2.17.1
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    depends_on:
+      - opensearch
+    networks:
+      - data-prepper-test
+
+networks:
+  data-prepper-test:
+
+volumes:
+  opensearch-config:
